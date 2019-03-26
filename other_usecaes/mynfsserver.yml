@@ -1,0 +1,57 @@
+--- # NFS server example
+- hosts: nfs
+  become: yes
+  become_user: root
+  user: mari
+  connection: ssh
+  gather_facts: yes
+  vars: 
+    nfs_moutnpoint: '/nfsmount'
+    nfsserver: 'sunmari562.mylabserver.com'
+    nfsexport: '/nfsshare'
+  tasks:
+
+    - name: install the nfs package utils
+      yum: 
+       name={{ item }}
+       state=installed
+      with_items:
+        - nfs-utils
+      tags: nfs_client,nfs_server
+
+    - name: copying template to /etc/exprots
+      template:
+        src=files/exports.template
+        dest=/etc/exports
+        owner=root
+        group=root
+        mode=755
+      tags: nfs_server,copy_export
+
+    - name: restart the nfs server
+      service:
+        name=nfs
+        state=restarted
+        enabled=yes
+      tags: nfs_server
+       
+
+    - name: create a mountpoint directory for nfs 
+      file:
+        path={{ nfs_moutnpoint }}
+        state=directory
+        owner=root
+        mode=755
+      tags: nfs_client
+
+
+    - name: update fstab and mount nfs share
+      mount: 
+        name={{ nfs_moutnpoint }}
+        src={{ nfsserver }}:/{{ nfsexport }}
+        fstype=nfs
+        opts=defaults,rw,bg
+        dump=0
+        passno=2
+        state=mounted
+      tags: nfs_client

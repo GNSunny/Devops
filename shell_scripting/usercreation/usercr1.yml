@@ -1,0 +1,26 @@
+--- # creating a User on the remote server
+- hosts: abcd
+  become: true
+  become_user: root
+  vars: 
+    password: jkl
+    user_name: username
+    user_id: userid
+    p_group: pgroup
+    s_group: sgroup
+    comments: cmmts
+    hme: hmg
+  tasks:
+    - name: check if user exist or not 
+      shell: id {{ user_name }}
+      register: user_exist
+      ignore_errors: yes
+    - debug: msg="Username {{ user_name }} is already exits on {{ ansible_hostname }} server"
+      when: user_exist.rc == 0
+
+    - name: user creation
+      user: name={{ user_name }} uid={{ user_id }} home={{ hme }} group={{ p_group }} groups={{ s_group }} comment={{ comments }} password={{ password }} append=yes
+      when: user_exist.rc != 0 
+      register: user_creation
+    - debug: msg="Username {{ user_name }} is created on {{ ansible_hostname }} tnQ god" 
+      when: user_creation.changed

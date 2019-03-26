@@ -1,0 +1,13 @@
+## NTP config - Managed using Ansible
+
+driftline /var/lib/ntp/drift
+restrict default nomodify notrap nopeer noquery
+restrict 127.0.0.1
+restrict ::1
+
+server {{ ntp_server1 }} iburst
+server {{ ntp_server2 }} iburst
+
+keys /etc/ntp/keys
+diable monitor
+

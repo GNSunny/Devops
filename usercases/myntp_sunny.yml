@@ -1,0 +1,47 @@
+--- # NTP service example 
+- hosts: nfs
+  user: mari
+  become: yes
+  connection: ssh
+  gather_facts: yes
+  vars:
+   ntp_server1: sunmari562.mylabserver.com
+   ntp_server2: sunmari565.mylabserver.com
+  tasks:
+      
+    #  having chrony  and ntp both on system may cause issues
+    - name: remove chrony package from the system
+      yum:
+       name=chrony
+       state=absent
+      tags: remove_chrony,start_ntp
+
+    # this task is to ensure ntp package is installed         
+    - name: install the ntp package
+      yum: 
+       name=ntp
+       state=latest
+      tags: install_ntp,start_ntp
+
+    # this task is to copy the custm ntp.conf file
+    - name: deply ntp.conf file to the clients
+      template:
+       src=files/ntp.j2
+       dest=/etc/ntp.conf
+       owner=root
+       group=root
+       mode=0644
+       backup=yes
+      notify: start_restart_ntp_client
+      tags: copy_ntp_conf,start_ntp
+
+  # handlers
+  handlers:     
+    - name: start_restart_ntp_client
+      service: 
+       name=ntpd
+       state=restarted
+       enabled=yes
+
+
+  

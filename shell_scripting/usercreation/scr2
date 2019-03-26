@@ -1,0 +1,31 @@
+#!/bin/bash
+Red='\033[1;91m'             # Red
+BIGreen='\033[1;92m'           # Green
+BIYellow='\033[1;93m'          # Yellow
+BIBlue='\033[1;94m'            # Blue
+BIPurple='\033[1;95m'          # Purple
+BICyan='\033[1;96m'            # Cyan
+NORMAL="\033[0;39m"
+
+echo -e $BIPurple'Enter username which needs to be created' $NORMAL
+read username
+
+echo -e $BIPurple 'Enter home directory' $NORMAL
+read hmg
+
+echo -e $BIPurple 'Enter User ID whcih needs  to be created' $NORMAL
+read userid
+
+echo -e $BIPurple 'Enter the primary Group name or Group ID' $NORMAL
+read pgroup
+
+echo -e $BIPurple 'Enter the secondary group name or multiple group names' $NORMAL
+read sgroup
+
+echo -e $BIPurple 'Enter comments for User' $NORMAL
+read cmmts
+
+cat usercr3.yml | sed "s/username/$username/g" | sed "s/userid/$userid/g" | sed "s/pgroup/$pgroup/g" | sed "s/sgroup/$sgroup/g" | sed "s/cmmts/$cmmts/g" | sed "s~hmg~$hmg~g" > usercr2.yml
+
+ansible-playbook usercr2.yml 
+sleep 3

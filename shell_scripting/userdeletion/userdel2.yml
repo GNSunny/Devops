@@ -1,0 +1,11 @@
+--- # Playbook for the user deletion
+- hosts: twoservers
+  become: true
+  become_user: root
+  tasks:
+  - name: User removal
+    user: name=Olivia state=absent remove=yes
+    register: user_del
+  - debug: msg="user Olivia has been removed freom the {{ ansible_hostname }} server"
+    when: user_del.changed
+  - debug: var=user_del

@@ -1,0 +1,53 @@
+--- # DATABASE DEPLOYMENT EXAMPLE
+- hosts: appserver
+  become: yes
+  user: mari
+  connection: ssh
+  gather_facts: yes
+  vars: 
+    dbserver_pkg: mariadb-server
+    dbclient_pkg: mariadb
+    dbserver_fqdn: sunmari562.mylabserver.com
+    dbinstall_dir: /var/lib
+    dbinstance_name: MyDBTest
+    dbversion: 5.5.44
+
+  tasks:
+    - name: install the Maria dB server
+      yum: name=mariadb-server state=latest
+    
+    - name: install the Marian dB client Utilities
+      yum: name=mariadb state=latest
+
+    - name: start the Maria dB Service
+      service: name=mariadb state=started
+    - pause: prompt="please run the mysql_server installation binary and then press enterfor the play to continue"
+
+    - name: restart  the dB Service again in here
+      service: name=mariadb state=restarted
+
+    
+    - name: copy of a dB restoring from the old DB in order to start a new instance of dB
+      copy: src=files/mysqlbkup.sql dest=/var/lib/mysqlbkup.sql owner=root group=root mode=755
+
+
+    - name: create a remote dB instance before importing backsql
+      shell: mysqladmin -u root -ppassword123 create MyDBTest    
+
+
+    - name: import the database backup to the live dB
+      shell: mysql -u root -ppassword123 MyDBTest < /var/lib/mysqlbkup.sql
+      register:  result
+    - debug: var=result
+
+
+    - name: add a back CRON job to run everyday at midnight
+      cron: name="DBBackup" minute="0" hour="0" job="mysqldump -u root -ppassword123 --databases MyBDTest > dbbup.sql"
+
+    - name: Run a quicksql command to be sure everything was created and is working
+      shell: mysql -u root -ppassword123 -e 'SHOW DATABASES;'
+      register: mysqlresult
+    - debug: var=mysqlresult
+  
+
+

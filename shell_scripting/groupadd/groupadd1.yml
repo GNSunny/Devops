@@ -1,0 +1,11 @@
+--- # Creating a groupadd playbook 
+- hosts: abcd
+  become: true
+  become_user: root
+  vars: 
+   group_name: abcd
+   group_idnum: gidvalue
+  tasks:
+  - name: Group add tasks
+    group: name={{ group_name }} gid={{ group_idnum }} state=present
+
